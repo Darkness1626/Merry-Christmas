@@ -272,35 +272,43 @@ function createParticles() {
 
 var getScale = gsap.utils.random(0.5, 3, 0.001, true);
 
-function playParticle(p) {
-  if (!showParticle) {
-    return;
-  }
+function playParticle() {
+  if (!showParticle) return;
+
+  // Lấy particle từ pool
   var p = particlePool[particleCount];
+
+  // Đặt vị trí ban đầu của particle tại vị trí container
   gsap.set(p, {
     x: gsap.getProperty(".pContainer", "x"),
     y: gsap.getProperty(".pContainer", "y"),
-    scale: getScale(),
+    scale: getScale(), // Kích thước ngẫu nhiên
+    opacity: 1, // Đặt particle hiện rõ ban đầu
   });
 
-  // Timeline thay thế hiệu ứng Physics2DPlugin
-  var duration = gsap.utils.random(0.61, 6); // Thời gian hiệu ứng (0.61 - 6 giây)
+  // Tạo chuyển động bay cho particle
   gsap.to(p, {
-    duration: duration,
-    x: `+=${gsap.utils.random(-200, 200)}`, // Di chuyển ngẫu nhiên theo trục X
-    y: `+=${gsap.utils.random(-200, 200)}`, // Di chuyển ngẫu nhiên theo trục Y
+    duration: gsap.utils.random(2, 5), // Thời gian bay ngẫu nhiên
+    x: `+=${gsap.utils.random(-300, 300)}`, // Di chuyển ngang ngẫu nhiên
+    y: `+=${gsap.utils.random(-300, 300)}`, // Di chuyển dọc ngẫu nhiên
     rotation: gsap.utils.random(-360, 360), // Xoay ngẫu nhiên
-    scale: 0, // Thu nhỏ dần
-    ease: "power1.out", // Hiệu ứng easing mượt mà
-    onStart: flicker, // Bắt đầu với hiệu ứng flicker
-    onStartParams: [p],
+    scale: 0, // Thu nhỏ dần về 0
+    opacity: 0, // Mờ dần về 0
+    ease: "power1.out", // Hiệu ứng easing mượt
     onComplete: () => {
-      gsap.set(p, { opacity: 1 }); // Đặt lại particle khi kết thúc
+      // Đặt lại particle sau khi hoàn thành
+      gsap.set(p, {
+        x: -100,
+        y: -100,
+        opacity: 1,
+        scale: getScale(),
+      });
     },
   });
 
+  // Tăng bộ đếm và lặp lại nếu vượt quá số particle
   particleCount++;
-  particleCount = particleCount >= numParticles ? 0 : particleCount;
+  if (particleCount >= numParticles) particleCount = 0;
 }
 
 function drawStar() {
