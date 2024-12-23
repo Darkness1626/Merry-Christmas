@@ -250,55 +250,61 @@ function flicker(p) {
 }
 
 function createParticles() {
-  for (let i = 0; i < numParticles; i++) {
-    const particle = select(particleTypeArray[i % particleTypeArray.length]).cloneNode(true);
-    mainSVG.appendChild(particle);
-    particle.setAttribute("fill", particleColorArray[i % particleColorArray.length]);
-    particle.setAttribute("class", "particle");
-    particlePool.push(particle);
-
-    // Ẩn particle ban đầu
-    gsap.set(particle, {
+  var i = numParticles,
+    p,
+    particleTl,
+    step = numParticles / treePath.length,
+    pos;
+  while (--i > -1) {
+    p = select(particleTypeArray[i % particleTypeArray.length]).cloneNode(true);
+    mainSVG.appendChild(p);
+    p.setAttribute("fill", particleColorArray[i % particleColorArray.length]);
+    p.setAttribute("class", "particle");
+    particlePool.push(p);
+    //hide them initially
+    gsap.set(p, {
       x: -100,
       y: -100,
-      opacity: 0,
-      scale: 1,
+      transformOrigin: "50% 50%",
     });
   }
 }
 
 var getScale = gsap.utils.random(0.5, 3, 0.001, true);
 
-function playParticle() {
-  if (!showParticle) return;
-
-  const particle = particlePool[particleCount];
-
-  // Đặt lại particle tại vị trí xuất phát
-  gsap.set(particle, {
+function playParticle(p) {
+  if (!showParticle) {
+    return;
+  }
+  var p = particlePool[particleCount];
+  gsap.set(p, {
     x: gsap.getProperty(".pContainer", "x"),
     y: gsap.getProperty(".pContainer", "y"),
-    scale: gsap.utils.random(0.5, 1.5),
-    opacity: 1,
+    scale: getScale(),
   });
-
-  // Tạo hiệu ứng chuyển động
-  gsap.to(particle, {
-    duration: gsap.utils.random(1.5, 3), // Thời gian chuyển động
-    x: `+=${gsap.utils.random(-200, 200)}`, // Bay theo hướng ngẫu nhiên trên trục x
-    y: `+=${gsap.utils.random(-200, 300)}`, // Bay theo hướng ngẫu nhiên trên trục y
-    scale: 0, // Thu nhỏ dần về 0
-    opacity: 0, // Làm mờ dần về 0
-    rotation: gsap.utils.random(-180, 180), // Xoay ngẫu nhiên
-    ease: "power2.out", // Hiệu ứng easing mượt
-    onComplete: () => {
-      // Reset particle khi hoàn thành hiệu ứng
-      gsap.set(particle, { x: -100, y: -100, opacity: 0 });
+  var tl = gsap.timeline();
+  tl.to(p, {
+    duration: gsap.utils.random(0.61, 6),
+    physics2D: {
+      velocity: gsap.utils.random(-23, 23),
+      angle: gsap.utils.random(-180, 180),
+      gravity: gsap.utils.random(-6, 50),
     },
+    scale: 0,
+    rotation: gsap.utils.random(-123, 360),
+    ease: "power1",
+    onStart: flicker,
+    onStartParams: [p],
+    onRepeat: (p) => {
+      gsap.set(p, {
+        scale: getScale(),
+      });
+    },
+    onRepeatParams: [p],
   });
 
-  // Cập nhật bộ đếm
-  particleCount = (particleCount + 1) % numParticles;
+  particleCount++;
+  particleCount = particleCount >= numParticles ? 0 : particleCount;
 }
 
 function drawStar() {
