@@ -282,25 +282,21 @@ function playParticle(p) {
     y: gsap.getProperty(".pContainer", "y"),
     scale: getScale(),
   });
-  var tl = gsap.timeline();
-  tl.to(p, {
-    duration: gsap.utils.random(0.61, 6),
-    physics2D: {
-      velocity: gsap.utils.random(-23, 23),
-      angle: gsap.utils.random(-180, 180),
-      gravity: gsap.utils.random(-6, 50),
-    },
-    scale: 0,
-    rotation: gsap.utils.random(-123, 360),
-    ease: "power1",
-    onStart: flicker,
+
+  // Timeline thay thế hiệu ứng Physics2DPlugin
+  var duration = gsap.utils.random(0.61, 6); // Thời gian hiệu ứng (0.61 - 6 giây)
+  gsap.to(p, {
+    duration: duration,
+    x: `+=${gsap.utils.random(-200, 200)}`, // Di chuyển ngẫu nhiên theo trục X
+    y: `+=${gsap.utils.random(-200, 200)}`, // Di chuyển ngẫu nhiên theo trục Y
+    rotation: gsap.utils.random(-360, 360), // Xoay ngẫu nhiên
+    scale: 0, // Thu nhỏ dần
+    ease: "power1.out", // Hiệu ứng easing mượt mà
+    onStart: flicker, // Bắt đầu với hiệu ứng flicker
     onStartParams: [p],
-    onRepeat: (p) => {
-      gsap.set(p, {
-        scale: getScale(),
-      });
+    onComplete: () => {
+      gsap.set(p, { opacity: 1 }); // Đặt lại particle khi kết thúc
     },
-    onRepeatParams: [p],
   });
 
   particleCount++;
